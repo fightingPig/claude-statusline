@@ -3,15 +3,16 @@
 合并 statusLine 配置到 ~/.claude/settings.json
 保留已有的所有配置，只添加或覆盖 statusLine 和相关 env 配置
 """
-import json, os, sys
+import json, os, sys, platform
 
 SETTINGS_PATH = os.path.expanduser("~/.claude/settings.json")
 
-# 要注入的配置
+# 根据系统选择 Python 命令 (Mac 无 python, 只有 python3)
+PYTHON_CMD = "python3" if platform.system() == "Darwin" else "python"
 SCRIPT_PATH = os.path.expanduser("~/.claude/statusline.py")
 STATUSLINE_STATUS = {
     "type": "command",
-    "command": "python " + SCRIPT_PATH
+    "command": f"{PYTHON_CMD} {SCRIPT_PATH}"
 }
 
 STATUSLINE_ENV = {
