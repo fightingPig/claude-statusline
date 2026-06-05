@@ -8,9 +8,10 @@ import json, os, sys
 SETTINGS_PATH = os.path.expanduser("~/.claude/settings.json")
 
 # 要注入的配置
+SCRIPT_PATH = os.path.expanduser("~/.claude/statusline.py")
 STATUSLINE_STATUS = {
     "type": "command",
-    "command": "python C:/Users/zhaosheng48895/.claude/statusline.py"
+    "command": "python " + SCRIPT_PATH
 }
 
 STATUSLINE_ENV = {
