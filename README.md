@@ -1,22 +1,19 @@
 # Claude Code 状态栏
 
-增强 Claude Code 状态栏，一目了然显示关键信息：
+增强 Claude Code 状态栏，两行显示关键信息：
 
 ```
-📂 isms6-system │ 🌿 develop │ 🧠 deepseek-v4-flash ⚡ xhigh │ ███████░░░ 75% │ 🔀 PR #42
+📂 dir │ 🌿 main │ 🧠 model ⚡ effort │ █████████░ 90% │ 🔀 PR #42
+current : ↑153 ↓362 │ total : ↑105K ↓4K │ cache : 99.73% │ balance : ¥174.59
 ```
 
 ## 功能
 
-| 段 | 图标 | 说明 |
-|---|------|------|
-| 当前目录 | 📂 | 工作目录名 |
-| 当前分支 | 🌿 | Git 分支（自动识别） |
-| 模型 + Effort | 🧠 ⚡ | 当前模型名和 effort 级别 |
-| 上下文进度条 | ███████░░░ | 上下文窗口剩余百分比，直观进度条 |
-| PR 编号 | 🔀 | 当前关联的 PR（有则显示） |
+**第一行**：当前目录、Git 分支、模型 + Effort、上下文进度条、PR 编号
 
-## 一键安装
+**第二行**：本轮 I/O 用量、累计 I/O 用量、缓存命中率、Deepseek 账户余额
+
+## 安装
 
 ### Windows (PowerShell)
 
@@ -30,66 +27,20 @@ irm https://raw.githubusercontent.com/fightingPig/claude-statusline/main/install
 curl -fsSL https://raw.githubusercontent.com/fightingPig/claude-statusline/main/install.sh | bash
 ```
 
-安装脚本会自动：
-1. 下载 `statusline.py` 到 `~/.claude/`
-2. 合并 `statusLine` 配置到 `~/.claude/settings.json`
-3. 添加 1M 上下文窗口环境变量
+安装脚本会下载脚本并配置 `settings.json`。如果检测到 Deepseek 官方 API 会自动启用余额查询，否则可手动配置。
 
-## 手动配置
+## Deepseek 余额查询
 
-### 1. 放置脚本
+状态栏支持显示 Deepseek 账户余额，密钥按以下顺序获取：
 
-将 `statusline.py` 复制到 `~/.claude/statusline.py`
+1. `env.DEEPSEEK_API_KEY` — 手动配置
+2. `env.ANTHROPIC_AUTH_TOKEN` — 仅当 `ANTHROPIC_BASE_URL` 为 `https://api.deepseek.com` 时自动复用
 
-### 2. settings.json
-
-在 `~/.claude/settings.json` 中添加：
-
-```json
-{
-  "env": {
-    "CLAUDE_MAX_CONTEXT_WINDOW": "1000000",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000"
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "python ~/.claude/statusline.py"
-  }
-}
-```
-
-> **注意**：Windows 路径中 `~` 会被自动展开为 `C:\Users\用户名`，也可以使用绝对路径：
-> ```json
-> "command": "python C:/Users/用户名/.claude/statusline.py"
-> ```
-
-## 自定义
-
-### 修改显示顺序
-
-编辑 `statusline.py`，调整 `parts.append()` 的调用顺序即可。
-
-### 添加/删除显示项
-
-- 删除某项：注释或删除对应的 `parts.append()` 代码块
-- 添加图标：参考现有代码，使用对应 Unicode emoji
-
-### 修改分隔符
-
-在文件末尾将 `" │ "` 改为你想要的符号，例如 `" | "` 或 `"  "`（空格）。
-
-## 已安装的文件
-
-| 文件 | 路径 |
-|------|------|
-| 状态栏脚本 | `~/.claude/statusline.py` |
-| 配置 | `~/.claude/settings.json` |
+余额缓存 60 秒，避免频繁请求。
 
 ## 卸载
 
 ```bash
-# 删除脚本
 rm ~/.claude/statusline.py
-
-# 然后从 ~/.claude/settings.json 中删除 "statusLine" 字段
+# 并从 ~/.claude/settings.json 删除 "statusLine" 字段
 ```
