@@ -15,12 +15,6 @@ STATUSLINE_STATUS = {
     "command": f"{PYTHON_CMD} {SCRIPT_PATH}"
 }
 
-STATUSLINE_ENV = {
-    "CLAUDE_MAX_CONTEXT_WINDOW": "1000000",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000"
-}
-
-
 def main():
     if not os.path.exists(SETTINGS_PATH):
         print(f"错误: 未找到 {SETTINGS_PATH}")
@@ -32,13 +26,6 @@ def main():
 
     # 添加状态栏配置
     settings["statusLine"] = STATUSLINE_STATUS
-
-    # 添加环境变量（保留已有的 env）
-    if "env" not in settings:
-        settings["env"] = {}
-    for k, v in STATUSLINE_ENV.items():
-        if k not in settings["env"]:
-            settings["env"][k] = v
 
     with open(SETTINGS_PATH, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=2, ensure_ascii=False)

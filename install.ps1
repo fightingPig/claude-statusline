@@ -49,8 +49,6 @@ Write-Host "🎉 安装完成！" -ForegroundColor Green
 Write-Host ""
 Write-Host "📋 已在 settings.json 中添加以下配置:"
 Write-Host "   - statusLine 命令 (调用 statusline.py)"
-Write-Host "   - CLAUDE_MAX_CONTEXT_WINDOW = 1000000"
-Write-Host "   - CLAUDE_CODE_AUTO_COMPACT_WINDOW = 1000000"
 Write-Host ""
 Write-Host "🔄 请重新启动 Claude Code 以生效"
 Write-Host ""
