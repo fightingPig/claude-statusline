@@ -65,7 +65,13 @@ if ctx is not None:
     ctx_int = int(round(ctx))
     filled = ctx_int // 10
     bar = "\u2588" * filled + "\u2591" * (10 - filled)
-    parts.append(f"{bar} {ctx_int}%")
+    if ctx_int >= 50:
+        color = "38;5;46"
+    elif ctx_int >= 20:
+        color = "38;5;226"
+    else:
+        color = "38;5;196"
+    parts.append(f"\033[{color}m{bar} {ctx_int}%\033[0m")
 
 # 🔀 PR number
 pr = data.get("pr", {}).get("number")
