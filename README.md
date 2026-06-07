@@ -56,3 +56,11 @@ rm ~/.claude/statusline.py
 - 修复: effort 字段解析字典格式的兼容问题
 - 修复: 安装脚本中的 shell 注入风险
 - 移除: `CLAUDE_MAX_CONTEXT_WINDOW` / `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 环境变量配置
+
+### 2026-06-07
+- 新增: 脚本包裹在 main() 函数内，增加顶层异常兜底
+- 新增: 模型名称缺失时始终显示占位符，保证第一行有内容
+- 新增: 第二行始终固定输出 current/total/cache 三个字段
+- 修复: context_window/current_usage 为 null 时脚本崩溃
+- 修复: 第二行字段缺失时整行不输出的问题
+- 优化: 余额查询改为仅读本地缓存，不再阻塞状态栏输出
