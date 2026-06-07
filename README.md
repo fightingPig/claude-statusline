@@ -44,3 +44,15 @@ curl -fsSL https://raw.githubusercontent.com/fightingPig/claude-statusline/main/
 rm ~/.claude/statusline.py
 # 并从 ~/.claude/settings.json 删除 "statusLine" 字段
 ```
+
+## 变更日志
+
+### 2026-06-07
+- 新增第二行显示：本轮 I/O 用量、累计 I/O 用量（自动 K/M 转换）
+- 新增缓存命中率显示
+- 新增 Deepseek 账户余额查询（60 秒缓存）
+- 新增安装时智能检测 Deepseek 官方 API 并自动配置余额查询
+- 新增上下文进度条 True Color 状态指示（绿/黄/红）
+- 修复: effort 字段解析字典格式的兼容问题
+- 修复: 安装脚本中的 shell 注入风险
+- 移除: `CLAUDE_MAX_CONTEXT_WINDOW` / `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 环境变量配置
