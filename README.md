@@ -149,6 +149,8 @@ rm ~/.claude/statusline.py
 ## 变更日志
 
 ### 2026-06-11
+- 修复: 安装脚本 `curl \| bash` 管道导致 Deepseek API Key 输入提示被跳过，`read` 改为从 `/dev/tty` 读取
+- 修复: 安装脚本 Deepseek API URL 判断改为前缀匹配，兼容 `/v1` 等后缀
 - 修复: 累计 output tokens 算法从 delta 法改回相等性检测，避免 output 值重置时累计丢失
 - 新增: debug logging 基础设施，通过标记文件控制上下文窗口数据记录到 JSONL 日志，支持自动轮转
 

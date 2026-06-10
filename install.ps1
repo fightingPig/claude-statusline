@@ -51,7 +51,7 @@ if (Test-Path $SettingsPath) {
     try {
         $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json
         $baseUrl = $settings.env.ANTHROPIC_BASE_URL
-        if ($baseUrl -eq "https://api.deepseek.com") {
+        if ($baseUrl -like "https://api.deepseek.com*") {
             $DeepseekAuto = $true
             if (-not $settings.env.DEEPSEEK_API_KEY -and $settings.env.ANTHROPIC_AUTH_TOKEN) {
                 $settings | Add-Member -NotePropertyName "env" -NotePropertyValue $settings.env -Force

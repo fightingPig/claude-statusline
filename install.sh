@@ -37,7 +37,7 @@ except Exception as e:
     print('', flush=True)
 ")
 
-    if [ "$BASE_URL" = "https://api.deepseek.com" ]; then
+    if [[ "$BASE_URL" == https://api.deepseek.com* ]]; then
         DEEPSEEK_AUTO=1
         if ! SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
 import os, json
@@ -61,9 +61,9 @@ fi
 if [ "$DEEPSEEK_AUTO" -eq 0 ]; then
     echo "❓ 当前非 Deepseek 官方 API，仅支持查询 Deepseek 官方账户余额。"
     echo "   如果你是官方账户转接，需要额外提供官方 key，是否启用余额查询？(y/n)"
-    read -p "   " CONFIRM
+    read -p "   " CONFIRM < /dev/tty
     if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]; then
-        read -p "  请输入 Deepseek API Key: " DS_KEY
+        read -p "  请输入 Deepseek API Key: " DS_KEY < /dev/tty
         if [ -n "$DS_KEY" ]; then
             if ! DS_KEY="$DS_KEY" SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
 import os, json
