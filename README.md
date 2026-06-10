@@ -75,9 +75,9 @@ Claude Code 传给 statusline 的 `total_output_tokens` 字段不是会话累计
 def get_cumulative_out(session_id, this_out):
     cache = load_cache_file()              # 读 ~/.claude/.cumulative_cache.json
     s = cache.get(session_id, {})          # 按 session_id 隔离
-    if this_out > s["max_out"]:            # delta 检测：只加增量
-        s["cumulative"] += this_out - s["max_out"]
-        s["max_out"] = this_out
+    if this_out != s["last_out"]:          # 相等性检测：值变化时才累加
+        s["cumulative"] += this_out
+        s["last_out"] = this_out
     save_cache_file(cache)                 # 原子写入（write → rename）
     return s["cumulative"]
 ```
@@ -87,18 +87,18 @@ def get_cumulative_out(session_id, this_out):
 | 要素 | 说明 |
 |---|---|
 | `session_id` 做 Key | 不同会话的累计值隔离，互不干扰 |
-| `max_out` 检重 | statusline 每回合可能被调多次（debounce 刷新），`this_out == max_out` 时跳过不加，避免重复计数 |
+| `last_out` 检重 | statusline 每回合可能被调多次（debounce 刷新），`this_out == last_out` 时跳过不加，避免重复计数 |
 | 原子写入 | 先写 `.tmp` 文件再 `os.replace`，避免文件写坏导致数据丢失 |
 | 异常兜底 | 文件读写异常时返回 0，不影响状态栏显示 |
 
-**delta 检测场景示例：**
+**相等性检测场景示例：**
 
 ```
 时间线                                    输出值        累计行为
-API 响应到达 → tokenUsage 更新            out=406      累计 += 406
-debounce 刷新                              out=0        0 < max_out(406)，跳过
-另一轮 debounce 刷新                       out=406      406 == max_out(406)，跳过
-新的 API 响应                              out=577      577 > max_out(406)，累计 += 171
+API 响应到达 → tokenUsage 更新            out=406      406 != last_out(-1)，累计 += 406
+debounce 刷新                              out=0        0 != last_out(406)，累计 += 0
+另一轮 debounce 刷新                       out=0        0 == last_out(0)，跳过
+新的 API 响应                              out=577      577 != last_out(0)，累计 += 577
 ```
 
 ### 缓存命中率
@@ -147,6 +147,10 @@ rm ~/.claude/statusline.py
 ```
 
 ## 变更日志
+
+### 2026-06-11
+- 修复: 累计 output tokens 算法从 delta 法改回相等性检测，避免 output 值重置时累计丢失
+- 新增: debug logging 基础设施，通过标记文件控制上下文窗口数据记录到 JSONL 日志，支持自动轮转
 
 ### 2026-06-07
 - 新增: 自动更新机制——脚本自检查 + GitHub 版本比对 + 原子自替换

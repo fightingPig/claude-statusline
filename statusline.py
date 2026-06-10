@@ -13,6 +13,9 @@ UPDATE_INTERVAL = 86400  # 24h
 CUMU_FILE = os.path.expanduser("~/.claude/.cumulative_cache.json")
 _SSL_CTX = ssl._create_unverified_context()
 UPDATE_CACHE = os.path.expanduser("~/.claude/.update_cache")
+DEBUG_FLAG = os.path.expanduser("~/.claude/.statusline_debug")
+DEBUG_LOG = os.path.expanduser("~/.claude/.statusline_debug_log.jsonl")
+DEBUG_MAX_LINES = 10000
 
 try:
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
@@ -71,7 +74,7 @@ def check_update():
 
 
 def get_cumulative_out(session_id, this_out):
-    """按 session 累计 output tokens，delta 检测防重复计数"""
+    """按 session 累计 output tokens，相等性检测防重复计数"""
     try:
         cache = {}
         if os.path.exists(CUMU_FILE):
@@ -79,10 +82,10 @@ def get_cumulative_out(session_id, this_out):
                 cache = json.load(f)
         if not isinstance(cache, dict):
             cache = {}
-        s = cache.get(session_id, {"cumulative": 0, "max_out": 0})
-        if this_out > s.get("max_out", 0):
-            s["cumulative"] = s.get("cumulative", 0) + this_out - s["max_out"]
-            s["max_out"] = this_out
+        s = cache.get(session_id, {"cumulative": 0, "last_out": -1})
+        if this_out != s.get("last_out", -1):
+            s["cumulative"] = s.get("cumulative", 0) + this_out
+            s["last_out"] = this_out
         cache[session_id] = s
         tmp = CUMU_FILE + ".tmp"
         with open(tmp, "w") as f:
@@ -91,6 +94,39 @@ def get_cumulative_out(session_id, this_out):
         return s.get("cumulative", 0)
     except Exception:
         return 0
+
+
+def debug_log_context(data, ctx, ctx_int):
+    if not os.path.exists(DEBUG_FLAG):
+        return
+    try:
+        ctx_data_raw = data.get("context_window")
+        entry = {
+            "ts": time.time(),
+            "session_id": data.get("session_id", ""),
+            "ctx_window": ctx_data_raw,
+            "remaining_pct": ctx,
+            "ctx_int": ctx_int,
+        }
+        entry["ctx_int_anomaly"] = ctx_int > 100 or ctx_int < 0
+        line = json.dumps(entry, ensure_ascii=False) + "\n"
+
+        # Rotate if over max lines — keep last half
+        if os.path.exists(DEBUG_LOG):
+            with open(DEBUG_LOG, "r") as f:
+                all_lines = f.readlines()
+            if len(all_lines) >= DEBUG_MAX_LINES:
+                keep = DEBUG_MAX_LINES // 2
+                all_lines = all_lines[-keep:]
+                tmp = DEBUG_LOG + ".tmp"
+                with open(tmp, "w") as f:
+                    f.writelines(all_lines)
+                os.replace(tmp, DEBUG_LOG)
+
+        with open(DEBUG_LOG, "a") as f:
+            f.write(line)
+    except Exception:
+        pass
 
 
 def main():
@@ -164,6 +200,7 @@ def main():
     if ctx is None:
         ctx = 100
     ctx_int = int(round(ctx))
+    debug_log_context(data, ctx, ctx_int)
     filled = max(ctx_int // 10, 1) if ctx_int > 0 else 0
     bar = "█" * filled + "░" * (10 - filled)
     if ctx_int >= 50:
