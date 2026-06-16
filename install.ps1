@@ -69,16 +69,17 @@ $SettingsPath = "$env:USERPROFILE\.claude\settings.json"
 $DeepseekAuto = $false
 if (Test-Path $SettingsPath) {
     try {
-        $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json
-        $baseUrl = $settings.env.ANTHROPIC_BASE_URL
-        if ($baseUrl -like "https://api.deepseek.com*") {
-            $DeepseekAuto = $true
-            if (-not $settings.env.DEEPSEEK_API_KEY -and $settings.env.ANTHROPIC_AUTH_TOKEN) {
-                $settings | Add-Member -NotePropertyName "env" -NotePropertyValue $settings.env -Force
-                $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $settings.env.ANTHROPIC_AUTH_TOKEN -Force
-                Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
+        $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json -Depth 10
+        if ($settings.env) {
+            $baseUrl = $settings.env.ANTHROPIC_BASE_URL
+            if ($baseUrl -like "https://api.deepseek.com*") {
+                $DeepseekAuto = $true
+                if ($settings.env.ANTHROPIC_AUTH_TOKEN) {
+                    $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $settings.env.ANTHROPIC_AUTH_TOKEN -Force
+                    Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
+                    Write-Host "✅ 检测到 Deepseek 官方 API，已自动配置余额查询（跳过手动确认）" -ForegroundColor Green
+                }
             }
-            Write-Host "✅ 检测到 Deepseek 官方 API，已自动启用余额查询" -ForegroundColor Green
         }
     }
     catch {
@@ -94,7 +95,7 @@ if (-not $DeepseekAuto) {
         $DsKey = Read-Host "  请输入 Deepseek API Key"
         if ($DsKey) {
             try {
-                $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json
+                $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json -Depth 10
                 if (-not $settings.env) { $settings | Add-Member -NotePropertyName "env" -NotePropertyValue ([PSCustomObject]@{}) }
                 $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $DsKey -Force
                 Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
