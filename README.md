@@ -149,6 +149,8 @@ rm ~/.claude/statusline.py
 ## 变更日志
 
 ### 2026-06-17
+- 修复: install.ps1 `Set-Content -Encoding utf8` 写入 UTF-8 BOM，导致 Python `json.load` 报错，余额/模型读取静默失败。改用 `[System.Text.UTF8Encoding]::new($false)` 写文件
+- 修复: statusline.py / merge_settings.py / install.sh 所有读取 settings.json 的 `open()` 改用 `encoding='utf-8-sig'` 兼容 BOM
 - 修复: merge_settings.py 生成的 command 路径未加引号，Windows 用户名含空格时状态栏静默失败
 - 修复: merge_settings.py Windows 上硬编码 `python` 不可用，增加 `py`/`python3` 降级检测
 - 修复: install.ps1 同样增加 `python` → `py` → `python3` 命令检测降级

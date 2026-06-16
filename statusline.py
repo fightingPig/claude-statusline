@@ -174,7 +174,7 @@ def main():
     try:
         sf = os.path.expanduser("~/.claude/settings.json")
         if os.path.exists(sf):
-            with open(sf, encoding="utf-8") as f:
+            with open(sf, encoding="utf-8-sig") as f:
                 settings = json.load(f)
             if not model:
                 model = settings.get("model", "")
@@ -264,7 +264,7 @@ def main():
             sf = os.path.expanduser("~/.claude/settings.json")
             ds_key = None
             if os.path.exists(sf):
-                with open(sf) as f:
+                with open(sf, encoding="utf-8-sig") as f:
                     s = json.load(f)
                 env = s.get("env", {})
                 ds_key = env.get("DEEPSEEK_API_KEY", "")

@@ -30,7 +30,7 @@ def main():
         print("请先安装并运行 Claude Code 以生成默认配置文件。")
         sys.exit(1)
 
-    with open(SETTINGS_PATH, encoding="utf-8") as f:
+    with open(SETTINGS_PATH, encoding="utf-8-sig") as f:
         settings = json.load(f)
 
     # 添加状态栏配置

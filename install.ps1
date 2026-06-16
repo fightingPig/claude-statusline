@@ -9,6 +9,13 @@
 $ErrorActionPreference = "Stop"
 $RepoBase = "https://raw.githubusercontent.com/fightingPig/claude-statusline/main"
 
+# 写入 JSON 文件，不带 BOM（避免 Python json.load 报 UTF-8 BOM 错误）
+function Write-JsonNoBom {
+    param($Path, $Content)
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
+}
+
 Write-Host "🚀 正在安装 Claude Code 状态栏 ..." -ForegroundColor Cyan
 
 # 1. 确保 ~/.claude 目录存在
@@ -66,7 +73,7 @@ if (Test-Path $SettingsPath) {
             if (-not $settings.env.DEEPSEEK_API_KEY -and $settings.env.ANTHROPIC_AUTH_TOKEN) {
                 $settings | Add-Member -NotePropertyName "env" -NotePropertyValue $settings.env -Force
                 $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $settings.env.ANTHROPIC_AUTH_TOKEN -Force
-                $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsPath -Encoding utf8
+                Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
             }
             Write-Host "✅ 检测到 Deepseek 官方 API，已自动启用余额查询" -ForegroundColor Green
         }
@@ -87,7 +94,7 @@ if (-not $DeepseekAuto) {
                 $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json
                 if (-not $settings.env) { $settings | Add-Member -NotePropertyName "env" -NotePropertyValue ([PSCustomObject]@{}) }
                 $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $DsKey -Force
-                $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsPath -Encoding utf8
+                Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
                 Write-Host "✅ Deepseek API Key 已保存" -ForegroundColor Green
             }
             catch {

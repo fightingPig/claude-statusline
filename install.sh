@@ -30,7 +30,7 @@ if [ -f "$SETTINGS_PATH" ]; then
     BASE_URL=$(SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
 import os, json
 try:
-    with open(os.environ['SETTINGS_PATH']) as f:
+    with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
         s = json.load(f)
     print(s.get('env', {}).get('ANTHROPIC_BASE_URL', ''))
 except Exception as e:
@@ -41,13 +41,13 @@ except Exception as e:
         DEEPSEEK_AUTO=1
         if ! SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
 import os, json
-with open(os.environ['SETTINGS_PATH']) as f:
+with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
     s = json.load(f)
 env = s.setdefault('env', {})
 token = env.get('ANTHROPIC_AUTH_TOKEN', '')
 if token and 'DEEPSEEK_API_KEY' not in env:
     env['DEEPSEEK_API_KEY'] = token
-    with open(os.environ['SETTINGS_PATH'], 'w') as f:
+    with open(os.environ['SETTINGS_PATH'], 'w', encoding='utf-8') as f:
         json.dump(s, f, indent=2, ensure_ascii=False)
         f.write('\n')
 "; then
@@ -67,10 +67,10 @@ if [ "$DEEPSEEK_AUTO" -eq 0 ]; then
         if [ -n "$DS_KEY" ]; then
             if ! DS_KEY="$DS_KEY" SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
 import os, json
-with open(os.environ['SETTINGS_PATH']) as f:
+with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
     s = json.load(f)
 s.setdefault('env', {})['DEEPSEEK_API_KEY'] = os.environ['DS_KEY']
-with open(os.environ['SETTINGS_PATH'], 'w') as f:
+with open(os.environ['SETTINGS_PATH'], 'w', encoding='utf-8') as f:
     json.dump(s, f, indent=2, ensure_ascii=False)
     f.write('\n')
 "; then
