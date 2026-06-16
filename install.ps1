@@ -76,11 +76,12 @@ if (Test-Path $SettingsPath) {
             $hasAuthToken = [bool]$settings.env.ANTHROPIC_AUTH_TOKEN
 
             if ($isDeepseekUrl) {
-                $DeepseekAuto = $true
                 if ($hasDsKey) {
+                    $DeepseekAuto = $true
                     Write-Host "✅ 检测到 Deepseek 官方 API，余额查询密钥已存在，无需配置" -ForegroundColor Green
                 }
                 elseif ($hasAuthToken) {
+                    $DeepseekAuto = $true
                     $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $settings.env.ANTHROPIC_AUTH_TOKEN -Force
                     Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
                     Write-Host "✅ 检测到 Deepseek 官方 API，已自动复用 ANTHROPIC_AUTH_TOKEN 作为余额查询密钥" -ForegroundColor Green

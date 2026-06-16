@@ -61,11 +61,11 @@ except:
 ")
 
     if [[ "$BASE_URL" == https://api.deepseek.com* ]]; then
-        DEEPSEEK_AUTO=1
         if [ "$HAS_DS_KEY" = "1" ]; then
+            DEEPSEEK_AUTO=1
             echo "✅ 检测到 Deepseek 官方 API，余额查询密钥已存在，无需配置"
-        elif ! SETTINGS_PATH="$SETTINGS_PATH" $PYTHON -c "
-import os, json
+        elif SETTINGS_PATH="$SETTINGS_PATH" $PYTHON -c "
+import os, json, sys
 with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
     s = json.load(f)
 env = s.setdefault('env', {})
@@ -75,9 +75,10 @@ if token and 'DEEPSEEK_API_KEY' not in env:
     with open(os.environ['SETTINGS_PATH'], 'w', encoding='utf-8') as f:
         json.dump(s, f, indent=2, ensure_ascii=False)
         f.write('\n')
+else:
+    sys.exit(1)
 "; then
-            echo "❌ 写入 DEEPSEEK_API_KEY 失败" >&2
-        else
+            DEEPSEEK_AUTO=1
             echo "✅ 检测到 Deepseek 官方 API，已自动复用 ANTHROPIC_AUTH_TOKEN 作为余额查询密钥"
         fi
     elif [ "$HAS_DS_KEY" = "1" ]; then
