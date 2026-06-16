@@ -7,6 +7,8 @@
 #>
 
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $RepoBase = "https://raw.githubusercontent.com/fightingPig/claude-statusline/main"
 
 # 写入 JSON 文件，不带 BOM（避免 Python json.load 报 UTF-8 BOM 错误）
@@ -33,7 +35,8 @@ try {
     Write-Host "✅ 已保存到 $ScriptPath"
 }
 catch {
-    Write-Host "❌ 下载失败: $_" -ForegroundColor Red
+    Write-Host "❌ 下载 statusline.py 失败: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "   请检查网络连接或手动下载: $RepoBase/statusline.py" -ForegroundColor Yellow
     exit 1
 }
 
@@ -56,7 +59,7 @@ try {
     Remove-Item $MergePath -Force
 }
 catch {
-    Write-Host "❌ 配置合并失败: $_" -ForegroundColor Red
+    Write-Host "❌ 配置合并失败: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
 
@@ -98,7 +101,7 @@ if (-not $DeepseekAuto) {
                 Write-Host "✅ Deepseek API Key 已保存" -ForegroundColor Green
             }
             catch {
-                Write-Host "❌ 保存失败: $_" -ForegroundColor Red
+                Write-Host "❌ 保存失败: $($_.Exception.Message)" -ForegroundColor Red
             }
         }
     }

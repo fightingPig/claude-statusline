@@ -149,6 +149,8 @@ rm ~/.claude/statusline.py
 ## 变更日志
 
 ### 2026-06-17
+- 修复: install.ps1 下载失败时 `catch` 块中 `Write-Host "❌ 下载失败: $_"` 的 `$_` 字符串化在部分 PowerShell 版本中触发二次 `IndexOutOfRangeException`，改为 `$($_.Exception.Message)` 避免双异常
+- 修复: install.ps1 添加 `[Net.ServicePointManager]::SecurityProtocol = Tls12` 和 `$ProgressPreference = 'SilentlyContinue'`，兼容旧版 TLS 并避免进度条干扰下载
 - 修复: install.ps1 `Set-Content -Encoding utf8` 写入 UTF-8 BOM，导致 Python `json.load` 报错，余额/模型读取静默失败。改用 `[System.Text.UTF8Encoding]::new($false)` 写文件
 - 修复: statusline.py / merge_settings.py / install.sh 所有读取 settings.json 的 `open()` 改用 `encoding='utf-8-sig'` 兼容 BOM
 - 修复: merge_settings.py 生成的 command 路径未加引号，Windows 用户名含空格时状态栏静默失败
