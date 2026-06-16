@@ -5,6 +5,19 @@ REPO_BASE="https://raw.githubusercontent.com/fightingPig/claude-statusline/main"
 
 echo "🚀 正在安装 Claude Code 状态栏 ..."
 
+# 0. 检测可用的 Python 命令
+PYTHON=""
+for c in python3 python; do
+    if command -v "$c" &>/dev/null; then
+        PYTHON="$c"
+        break
+    fi
+done
+if [ -z "$PYTHON" ]; then
+    echo "❌ 未找到 Python，请先安装 Python 并添加到 PATH" >&2
+    exit 1
+fi
+
 # 1. 确保 ~/.claude 目录存在
 mkdir -p "$HOME/.claude"
 
@@ -18,7 +31,7 @@ echo "✅ 已保存到 $SCRIPT_PATH"
 MERGE_PATH="/tmp/merge_settings.py"
 echo "⬇️  下载配置合并脚本 ..."
 curl -fsSL "$REPO_BASE/merge_settings.py" -o "$MERGE_PATH"
-python3 "$MERGE_PATH" || python "$MERGE_PATH"
+$PYTHON "$MERGE_PATH"
 rm -f "$MERGE_PATH"
 
 # 4. Deepseek 余额查询配置
@@ -27,7 +40,7 @@ SETTINGS_PATH="$HOME/.claude/settings.json"
 DEEPSEEK_AUTO=0
 if [ -f "$SETTINGS_PATH" ]; then
     # 通过环境变量传值，避免 shell 注入
-    BASE_URL=$(SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
+    BASE_URL=$(SETTINGS_PATH="$SETTINGS_PATH" $PYTHON -c "
 import os, json
 try:
     with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
@@ -37,7 +50,7 @@ except Exception as e:
     print('', flush=True)
 ")
 
-    HAS_DS_KEY=$(SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
+    HAS_DS_KEY=$(SETTINGS_PATH="$SETTINGS_PATH" $PYTHON -c "
 import os, json
 try:
     with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
@@ -51,7 +64,7 @@ except:
         DEEPSEEK_AUTO=1
         if [ "$HAS_DS_KEY" = "1" ]; then
             echo "✅ 检测到 Deepseek 官方 API，余额查询密钥已存在，无需配置"
-        elif ! SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
+        elif ! SETTINGS_PATH="$SETTINGS_PATH" $PYTHON -c "
 import os, json
 with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
     s = json.load(f)
@@ -80,7 +93,7 @@ if [ "$DEEPSEEK_AUTO" -eq 0 ]; then
     if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]; then
         read -p "  请输入 Deepseek API Key: " DS_KEY < /dev/tty
         if [ -n "$DS_KEY" ]; then
-            if ! DS_KEY="$DS_KEY" SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
+            if ! DS_KEY="$DS_KEY" SETTINGS_PATH="$SETTINGS_PATH" $PYTHON -c "
 import os, json
 with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
     s = json.load(f)

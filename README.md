@@ -152,6 +152,7 @@ rm ~/.claude/statusline.py
 - 修复: install.ps1 DeepSeek 检测无 `$settings.env` 空值校验，首次安装时若 settings.json 无 env 节则静默跳过检测，导致已配 DeepSeek 用户仍被询问余额配置
 - 修复: install.ps1 移除冗余 `Add-Member -Force` 覆盖 `$settings` 自身 `env` 属性，简化检测逻辑
 - 修复: install.ps1 `ConvertFrom-Json` 默认 Depth=2 在 PS5.1 下嵌套 JSON 被截断，统一使用 `-Depth 10`
+- 修复: install.sh 多处硬编码 `python3`，仅安装 `python` 的系统上 merge 步骤通过但后续 DeepSeek 检测失败；改为顶部统一检测 `python3` / `python` 并存入 `$PYTHON` 变量复用
 - 修复: install.ps1 / install.sh DeepSeek 余额查询跳过条件不完整 —— 已配过 `DEEPSEEK_API_KEY` 但非 DeepSeek URL 时仍被询问，增加已有 Key 检测直接跳过
 - 优化: DeepSeek 检测成功消息改为「已自动复用 ANTHROPIC_AUTH_TOKEN 作为余额查询密钥，无需手动输入」
 - 修复: install.ps1 下载失败时 `catch` 块中 `Write-Host "❌ 下载失败: $_"` 的 `$_` 字符串化在部分 PowerShell 版本中触发二次 `IndexOutOfRangeException`，改为 `$($_.Exception.Message)` 避免双异常
