@@ -77,7 +77,7 @@ if (Test-Path $SettingsPath) {
                 if ($settings.env.ANTHROPIC_AUTH_TOKEN) {
                     $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $settings.env.ANTHROPIC_AUTH_TOKEN -Force
                     Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
-                    Write-Host "✅ 检测到 Deepseek 官方 API，已自动配置余额查询（跳过手动确认）" -ForegroundColor Green
+                    Write-Host "✅ 检测到 Deepseek 官方 API，已自动复用 ANTHROPIC_AUTH_TOKEN 作为余额查询密钥，无需手动输入" -ForegroundColor Green
                 }
             }
         }

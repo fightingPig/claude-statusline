@@ -152,7 +152,7 @@ rm ~/.claude/statusline.py
 - 修复: install.ps1 DeepSeek 检测无 `$settings.env` 空值校验，首次安装时若 settings.json 无 env 节则静默跳过检测，导致已配 DeepSeek 用户仍被询问余额配置
 - 修复: install.ps1 移除冗余 `Add-Member -Force` 覆盖 `$settings` 自身 `env` 属性，简化检测逻辑
 - 修复: install.ps1 `ConvertFrom-Json` 默认 Depth=2 在 PS5.1 下嵌套 JSON 被截断，统一使用 `-Depth 10`
-- 优化: DeepSeek 检测成功消息改为「已自动配置余额查询（跳过手动确认）」，明确告知跳过了交互步骤
+- 优化: DeepSeek 检测成功消息改为「已自动复用 ANTHROPIC_AUTH_TOKEN 作为余额查询密钥，无需手动输入」
 - 修复: install.ps1 下载失败时 `catch` 块中 `Write-Host "❌ 下载失败: $_"` 的 `$_` 字符串化在部分 PowerShell 版本中触发二次 `IndexOutOfRangeException`，改为 `$($_.Exception.Message)` 避免双异常
 - 修复: install.ps1 添加 `[Net.ServicePointManager]::SecurityProtocol = Tls12` 和 `$ProgressPreference = 'SilentlyContinue'`，兼容旧版 TLS 并避免进度条干扰下载
 - 修复: install.ps1 `Set-Content -Encoding utf8` 写入 UTF-8 BOM，导致 Python `json.load` 报错，余额/模型读取静默失败。改用 `[System.Text.UTF8Encoding]::new($false)` 写文件
