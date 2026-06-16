@@ -37,9 +37,21 @@ except Exception as e:
     print('', flush=True)
 ")
 
+    HAS_DS_KEY=$(SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
+import os, json
+try:
+    with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
+        s = json.load(f)
+    print('1' if s.get('env', {}).get('DEEPSEEK_API_KEY') else '0')
+except:
+    print('0')
+")
+
     if [[ "$BASE_URL" == https://api.deepseek.com* ]]; then
         DEEPSEEK_AUTO=1
-        if ! SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
+        if [ "$HAS_DS_KEY" = "1" ]; then
+            echo "✅ 检测到 Deepseek 官方 API，余额查询密钥已存在，无需配置"
+        elif ! SETTINGS_PATH="$SETTINGS_PATH" python3 -c "
 import os, json
 with open(os.environ['SETTINGS_PATH'], encoding='utf-8-sig') as f:
     s = json.load(f)
@@ -53,8 +65,11 @@ if token and 'DEEPSEEK_API_KEY' not in env:
 "; then
             echo "❌ 写入 DEEPSEEK_API_KEY 失败" >&2
         else
-            echo "✅ 检测到 Deepseek 官方 API，已自动启用余额查询"
+            echo "✅ 检测到 Deepseek 官方 API，已自动复用 ANTHROPIC_AUTH_TOKEN 作为余额查询密钥"
         fi
+    elif [ "$HAS_DS_KEY" = "1" ]; then
+        DEEPSEEK_AUTO=1
+        echo "✅ 检测到已有 DEEPSEEK_API_KEY，余额查询已配置，无需重复操作"
     fi
 fi
 
