@@ -148,6 +148,12 @@ rm ~/.claude/statusline.py
 
 ## 变更日志
 
+### 2026-06-17
+- 修复: merge_settings.py 生成的 command 路径未加引号，Windows 用户名含空格时状态栏静默失败
+- 修复: merge_settings.py Windows 上硬编码 `python` 不可用，增加 `py`/`python3` 降级检测
+- 修复: install.ps1 同样增加 `python` → `py` → `python3` 命令检测降级
+- 修复: install.ps1 手动输入 Key 时 `@{}` (Hashtable) 与 `Add-Member` 不兼容，改用 `[PSCustomObject]@{}`
+
 ### 2026-06-11
 - 修复: 安装脚本 `curl \| bash` 管道导致 Deepseek API Key 输入提示被跳过，`read` 改为从 `/dev/tty` 读取
 - 修复: 安装脚本 Deepseek API URL 判断改为前缀匹配，兼容 `/v1` 等后缀

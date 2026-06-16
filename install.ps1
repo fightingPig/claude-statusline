@@ -35,7 +35,17 @@ $MergePath = "$env:TEMP\merge_settings.py"
 Write-Host "⬇️  下载配置合并脚本 ..."
 try {
     Invoke-WebRequest -Uri "$RepoBase/merge_settings.py" -OutFile $MergePath -UseBasicParsing
-    python "$MergePath"
+    $pyCmd = $null
+    foreach ($c in @("python", "py", "python3")) {
+        if (Get-Command $c -ErrorAction SilentlyContinue) { $pyCmd = $c; break }
+    }
+    if (-not $pyCmd) {
+        Write-Host "❌ 未找到 Python，请先安装 Python 并添加到 PATH" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  使用 Python: $pyCmd"
+    & $pyCmd $MergePath
+    if ($LASTEXITCODE -ne 0) { throw "merge_settings.py 返回错误码 $LASTEXITCODE" }
     Remove-Item $MergePath -Force
 }
 catch {
@@ -75,7 +85,7 @@ if (-not $DeepseekAuto) {
         if ($DsKey) {
             try {
                 $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json
-                if (-not $settings.env) { $settings | Add-Member -NotePropertyName "env" -NotePropertyValue @{} }
+                if (-not $settings.env) { $settings | Add-Member -NotePropertyName "env" -NotePropertyValue ([PSCustomObject]@{}) }
                 $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $DsKey -Force
                 $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsPath -Encoding utf8
                 Write-Host "✅ Deepseek API Key 已保存" -ForegroundColor Green

@@ -3,16 +3,25 @@
 合并 statusLine 配置到 ~/.claude/settings.json
 保留已有的所有配置，只添加或覆盖 statusLine 和相关 env 配置
 """
-import json, os, sys, platform
+import json, os, sys, platform, shutil, shlex
 
 SETTINGS_PATH = os.path.expanduser("~/.claude/settings.json")
-
-# 根据系统选择 Python 命令 (Mac 无 python, 只有 python3)
-PYTHON_CMD = "python3" if platform.system() == "Darwin" else "python"
 SCRIPT_PATH = os.path.expanduser("~/.claude/statusline.py")
+
+
+def find_python():
+    """Return an available Python command on this system."""
+    candidates = ["python3", "python"] if platform.system() == "Darwin" else ["python", "py", "python3"]
+    for cmd in candidates:
+        if shutil.which(cmd):
+            return cmd
+    return "python"  # fallback, let it fail with a clear error
+
+
+PYTHON_CMD = find_python()
 STATUSLINE_STATUS = {
     "type": "command",
-    "command": f"{PYTHON_CMD} {SCRIPT_PATH}"
+    "command": f"{PYTHON_CMD} {shlex.quote(SCRIPT_PATH)}"
 }
 
 def main():
