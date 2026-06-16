@@ -18,6 +18,15 @@ function Write-JsonNoBom {
     [System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
 }
 
+# ConvertFrom-Json 兼容：PS 5.1 不支持 -Depth，PS 6.2+ 才支持
+function ConvertFrom-JsonSafe {
+    param($Content)
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        return $Content | ConvertFrom-Json -Depth 10
+    }
+    return $Content | ConvertFrom-Json
+}
+
 Write-Host "🚀 正在安装 Claude Code 状态栏 ..." -ForegroundColor Cyan
 
 # 1. 确保 ~/.claude 目录存在
@@ -69,7 +78,7 @@ $SettingsPath = "$env:USERPROFILE\.claude\settings.json"
 $DeepseekAuto = $false
 if (Test-Path $SettingsPath) {
     try {
-        $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json -Depth 10
+        $settings = Get-Content $SettingsPath -Raw | ConvertFrom-JsonSafe
         if ($settings.env) {
             $isDeepseekUrl = ($settings.env.ANTHROPIC_BASE_URL -like "https://api.deepseek.com*")
             $hasDsKey = [bool]$settings.env.DEEPSEEK_API_KEY
@@ -106,7 +115,7 @@ if (-not $DeepseekAuto) {
         $DsKey = Read-Host "  请输入 Deepseek API Key"
         if ($DsKey) {
             try {
-                $settings = Get-Content $SettingsPath -Raw | ConvertFrom-Json -Depth 10
+                $settings = Get-Content $SettingsPath -Raw | ConvertFrom-JsonSafe
                 if (-not $settings.env) { $settings | Add-Member -NotePropertyName "env" -NotePropertyValue ([PSCustomObject]@{}) }
                 $settings.env | Add-Member -NotePropertyName "DEEPSEEK_API_KEY" -NotePropertyValue $DsKey -Force
                 Write-JsonNoBom $SettingsPath ($settings | ConvertTo-Json -Depth 10)
